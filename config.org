@@ -5,36 +5,40 @@
 #+options: toc:2
 
 * Tabela de Conteúdos :toc:
-- [[#coisas-importantes-para-serem-carregadas-por-agora][Coisas importantes para serem carregadas por agora]]
+- [[#coisas-importantes-para-serem-carregadas-primeiro][Coisas importantes para serem carregadas primeiro]]
   - [[#package-manager-elpaca][Package Manager (Elpaca)]]
   - [[#evil-mode-vim--emacs][Evil Mode (Vim > Emacs)]]
   - [[#general-keybindings][General Keybindings]]
-- [[#catppuccin][Catppuccin]]
-- [[#all-the-icons][All The Icons]]
-- [[#fonts][Fonts]]
-  - [[#setando-fonte][Setando Fonte]]
-  - [[#zoom][Zoom]]
+- [[#coisas-bonitasaesthetic][Coisas bonitas/aesthetic]]
+  - [[#catppuccin][Catppuccin]]
+  - [[#all-the-icons][All The Icons]]
+  - [[#fonts][Fonts]]
 - [[#gui-and-coding-tweaks][GUI and Coding Tweaks]]
+  - [[#zoom][Zoom]]
   - [[#desabilitar-barras-de-menu-scroll-e-ferramentas][Desabilitar barras de menu, scroll e ferramentas]]
-  - [[#mostrar-número-da-linha-e-tal][Mostrar número da linha e tal]]
+  - [[#número-relativo-de-linha--word-wrap][Número Relativo de Linha + Word Wrap]]
   - [[#spaces-e-tabs][Spaces e Tabs]]
   - [[#language-specific-tweaks][Language Specific Tweaks]]
-- [[#which-key][Which-key]]
 - [[#org-mode][Org mode]]
   - [[#toc][ToC]]
   - [[#org-bullets][Org Bullets]]
   - [[#disable-eletric-indent][Disable Eletric Indent]]
   - [[#org-tempo][Org Tempo]]
-- [[#sudo-edit][SUDO EDIT]]
-- [[#ivy-counsel][IVY (COUNSEL)]]
-- [[#rainbow-mode][Rainbow Mode]]
-- [[#magit][Magit]]
-- [[#projectile][Projectile]]
-- [[#lsp-mode][LSP Mode]]
-- [[#doom-modeline][Doom Modeline]]
-- [[#ein-jupyter-notebook-extension][EIN (Jupyter Notebook Extension)]]
+- [[#just-the-essentials]["Just the essentials"]]
+  - [[#asdf][ASDF]]
+  - [[#which-key][Which-key]]
+  - [[#sudo-edit][SUDO EDIT]]
+  - [[#ivy-counsel][IVY (COUNSEL)]]
+  - [[#rainbow-mode][Rainbow Mode]]
+  - [[#magit][Magit]]
+  - [[#projectile][Projectile]]
+  - [[#lsp-mode][LSP Mode]]
+  - [[#ein-jupyter-notebook-extension][EIN (Jupyter Notebook Extension)]]
+  - [[#fzf][FZF]]
+  - [[#vterm][VTerm]]
+  - [[#company][Company]]
 
-* Coisas importantes para serem carregadas por agora
+* Coisas importantes para serem carregadas primeiro 
 ** Package Manager (Elpaca)
 Primeiro vamos setar legal o nosso Elpaca
 #+begin_src emacs-lisp
@@ -74,19 +78,20 @@ Primeiro vamos setar legal o nosso Elpaca
     (load "./elpaca-autoloads")))
 (add-hook 'after-init-hook #'elpaca-process-queues)
 (elpaca `(,@elpaca-order))
+
+;; Install use-package support
+(elpaca elpaca-use-package
+  ;; Enable :elpaca use-package keyword.
+  (elpaca-use-package-mode)
+  ;; Assume :elpaca t unless otherwise specified.
+  (setq elpaca-use-package-by-default t))
+
+;; Block until current queue processed.
+(elpaca-wait)
 #+end_src
 
 ** Evil Mode (Vim > Emacs)
 #+begin_src emacs-lisp
-  ;; Install use-package support
-  (elpaca elpaca-use-package
-    ;; Enable :elpaca use-package keyword.
-    (elpaca-use-package-mode)
-    ;; Assume :elpaca t unless otherwise specified.
-    (setq elpaca-use-package-by-default t))
-
-  ;; Block until current queue processed.
-  (elpaca-wait)
 
   ;;When installing a package which modifies a form used at the top-level
   ;;(e.g. a package which adds a use-package key word),
@@ -102,22 +107,14 @@ Primeiro vamos setar legal o nosso Elpaca
     (setq evil-want-keybinding nil)
     (setq evil-vsplit-window-right t)
     (setq evil-split-window-below t)
-    (setq evil-auto-indent nil)
+    (setq evil-auto-indent t)
     (evil-mode))
 
   (use-package evil-collection
     :after evil
     :config
-    (setq evil-collection-mode-list '(dashboard dired ibuffer))
+    (setq evil-collection-mode-list '(dashboard dired ibuffer magit))
     (evil-collection-init))
-
-  ;;Turns off elpaca-use-package-mode current declaration
-  ;;Note this will cause the declaration to be interpreted immediately (not deferred).
-  ;;Useful for configuring built-in emacs features.
-  ;;(use-package emacs :elpaca nil :config (setq ring-bell-function #'ignore))
-
-  ;; Don't install anything. Defer execution of BODY
-  ;;(elpaca nil (message "deferred"))
 #+end_src
 
 ** General Keybindings
@@ -130,12 +127,9 @@ Primeiro vamos setar legal o nosso Elpaca
       :keymaps 'override
       :prefix "SPC"
       :global-prefix "M-SPC")
-
-    (dan/leader-keys
-      "." '(find-file :wk "Find File")
-      "fp" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Edit Emacs config")
-      "fr" '(counsel-recentf :wk "Find recent files"))
 ;;      "gc" '(comment-line :wk "Edit Emacs config"))
+    (dan/leader-keys
+      "fp" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Edit Emacs config"))
 
     (dan/leader-keys
      "b" '(:ignore t :wk "buffer")
@@ -186,14 +180,15 @@ Primeiro vamos setar legal o nosso Elpaca
 
 #+end_src
 
-* Catppuccin
+* Coisas bonitas/aesthetic
+** Catppuccin
 Pretty theme for pretty developer
 #+begin_src emacs-lisp
 (use-package catppuccin-theme
   :init (load-theme 'catppuccin t))
 #+end_src
 
-* All The Icons
+** All The Icons
 Icon set fino do fino 
 #+begin_src emacs-lisp
 (use-package all-the-icons
@@ -203,23 +198,15 @@ Icon set fino do fino
     :hook (dired-mode . (lambda () (all-the-icons-dired-mode t))))
 #+end_src
 
-* Fonts
+** Fonts
 Código bom é código bonito, disse ninguém nunca
-
-** Setando Fonte
 #+begin_src emacs-lisp
-;(set-face-attribute 'default nil
-;    :font "IosevkaTerm Nerd Font Mono"
-;    :height 110
-;    :weight 'medium)
-;
-;(set-face-attribute 'font-lock-comment-face nil
-;    :slant 'italic)
-
-(set-frame-font "ComicShannsMono Nerd Font Mono 12" nil t)
-(setq-default line-spacing 0.12)
+(set-frame-font "M+CodeLat50 Nerd Font Mono 12" nil t)
+;(setq-default line-spacing 0.12)
 #+end_src
 
+* GUI and Coding Tweaks
+We tweaking rn
 ** Zoom
 CTRL + =/- pra dar zoom in e out
 #+begin_src emacs-lisp
@@ -229,9 +216,6 @@ CTRL + =/- pra dar zoom in e out
 (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
 #+end_src
 
-* GUI and Coding Tweaks
-We tweaking rn
-
 ** Desabilitar barras de menu, scroll e ferramentas
 #+begin_src emacs-lisp
 (menu-bar-mode -1)
@@ -240,10 +224,11 @@ We tweaking rn
 (setq inhibit-startup-screen t)
 #+end_src
 
-** Mostrar número da linha e tal
+** Número Relativo de Linha + Word Wrap
 #+begin_src emacs-lisp
 (global-display-line-numbers-mode 1)
 (setq-default display-line-numbers-type 'relative)
+(global-visual-line-mode 1)
 #+end_src
 
 ** Spaces e Tabs
@@ -256,12 +241,6 @@ We tweaking rn
 ** Language Specific Tweaks
 #+begin_src emacs-lisp
 (setq-default js-indent-level 2)
-#+end_src
-
-* Which-key
-#+begin_src emacs-lisp
-(use-package which-key
-  :init (which-key-mode 1))
 #+end_src
 
 * Org mode
@@ -291,7 +270,29 @@ Aparentemente dá pra ganhar tempo com isso aqui. '<s' + TAB abre um begin_src
 (require 'org-tempo)
 #+end_src
 
-* SUDO EDIT
+* "Just the essentials"
+I don't have a plugin problem
+** ASDF
+Version management but like, actually good
+#+begin_src emacs-lisp
+(use-package asdf
+  :elpaca (
+    :host github 
+    :repo "tabfugnic/asdf.el"
+  )
+  :config
+  (asdf-enable)
+)
+#+end_src
+
+** Which-key
+Yeah but like which tho
+#+begin_src emacs-lisp
+(use-package which-key
+  :init (which-key-mode 1))
+#+end_src
+
+** SUDO EDIT
 Eu quero editar coisas como sudo às vezes, então isso é legal
 #+begin_src emacs-lisp
 (use-package sudo-edit
@@ -301,7 +302,7 @@ Eu quero editar coisas como sudo às vezes, então isso é legal
         "fU" '(sudo-edit :wk "Sudo edit file")))
 #+end_src
 
-* IVY (COUNSEL)
+** IVY (COUNSEL)
 + Ivy permite completar as coisas no Emacs
 + Counsel é uma coleção de versões melhoradas de comandos do Emacs usando Ivy
 + Ivy-rich permite adicionar descrições junto aos comandos do M-x
@@ -345,7 +346,7 @@ Eu quero editar coisas como sudo às vezes, então isso é legal
 				 'ivy-rich-switch-buffer-transformer))
 #+end_src
 
-* Rainbow Mode
+** Rainbow Mode
 OMG DOUBLE RAINBOW
 #+begin_src emacs-lisp
 (use-package rainbow-mode
@@ -353,7 +354,7 @@ OMG DOUBLE RAINBOW
     ((org-mode prog-mode) . rainbow-mode))
 #+end_src
 
-* Magit
+** Magit
 Because git is important for developers or whatever
 #+begin_src emacs-lisp
   (use-package magit
@@ -368,7 +369,7 @@ Because git is important for developers or whatever
   )
 #+end_src
 
-* Projectile
+** Projectile
 Sniper get down!
 #+begin_src emacs-lisp
   (use-package projectile
@@ -384,18 +385,24 @@ Sniper get down!
 )
 #+end_src
 
-* LSP Mode
+** LSP Mode
 M-x vscode
 #+begin_src emacs-lisp
 (use-package lsp-mode
   :init
   ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
   :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
-         (js-mode . lsp-deferred)
-         (ruby-mode . lsp-deferred)
-         (rust-mode . lsp-deferred)
+         (js-mode . lsp)
+         (ruby-mode . lsp)
+         (rust-mode . lsp)
          ;; if you want which-key integration
          (lsp-mode . lsp-enable-which-key-integration))
+  :config
+  (dan/leader-keys
+    "l"  '(:ignore t :wk "lsp")
+    "ls" '(lsp-describe-session t :wk "lsp status")
+    "lt" '(lsp-ui-mode t :wk "lsp toggle ui")
+  )
   :commands lsp)
 
 ;; optionally
@@ -417,15 +424,39 @@ M-x vscode
 
 #+end_src
 
-* Doom Modeline
-#+begin_src emacs-lisp
-(use-package doom-modeline
-  :ensure t
-  :init (doom-modeline-mode 1))
-#+end_src
-
-* EIN (Jupyter Notebook Extension)
+** EIN (Jupyter Notebook Extension)
 Because Jupyter is unfortunatelly necessary for my work
 #+begin_src emacs-lisp
 (use-package ein)
+#+end_src
+
+** FZF 
+the actual necessary item in all this
+#+begin_src emacs-lisp
+(use-package fzf
+  :config
+  (dan/leader-keys
+    "s"   '(:ignore t :wk "search")
+    "sg"  '(fzf-grep t :wk "search project for word")
+    "sf"  '(fzf-find-file t :wk "search")
+    "sd"  '(dired t :wk "search")
+    "sr"  '(counsel-recentf :wk "Find recent files"))
+
+)
+#+end_src
+
+** VTerm
+Terminals do be terminaling
+#+begin_src emacs-lisp
+(use-package vterm)
+#+end_src
+
+
+** Company
+God knows I need it
+#+begin_src emacs-lisp
+(use-package company
+  :config
+  (add-hook 'prog-mode 'company-mode)
+)
 #+end_src
